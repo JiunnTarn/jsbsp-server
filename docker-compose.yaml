@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  jsbsp-server:
+    build: .
+    image: jsbsp-server:latest
+    ports:
+      - "57277:57277"
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://jsbsp-postgres:5432/jsbsp
+      - SPRING_DATASOURCE_USERNAME=jsbsp_admin
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      - jsbsp-postgres
+    volumes:
+      - ./logs:/app/logs
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  jsbsp-postgres:
+    image: postgres:latest
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_DB=jsbsp
+      - POSTGRES_USER=jsbsp_admin
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+volumes:
+  postgres-data:
